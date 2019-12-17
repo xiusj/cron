@@ -93,12 +93,12 @@ type FuncJob func()
 func (f FuncJob) Run() { f() }
 
 // AddFunc adds a func to the Cron to be run on the given schedule.
-func (c *Cron) AddFunc(spec string, cmd func(), id int) (EntryID, error) {
+func (c *Cron) AddFunc(spec string, cmd func(), id EntryID) (EntryID, error) {
 	return c.AddJob(spec, FuncJob(cmd), id)
 }
 
 // AddJob adds a Job to the Cron to be run on the given schedule.
-func (c *Cron) AddJob(spec string, cmd Job, id int) (EntryID, error) {
+func (c *Cron) AddJob(spec string, cmd Job, id EntryID) (EntryID, error) {
 	schedule, err := Parse(spec)
 	if err != nil {
 		return 0, err
@@ -107,10 +107,10 @@ func (c *Cron) AddJob(spec string, cmd Job, id int) (EntryID, error) {
 }
 
 // Schedule adds a Job to the Cron to be run on the given schedule.
-func (c *Cron) Schedule(schedule Schedule, cmd Job, id int) EntryID {
+func (c *Cron) Schedule(schedule Schedule, cmd Job, id EntryID) EntryID {
 	// c.nextID++
 	entry := &Entry{
-		ID:       EntryID(id),
+		ID:       id,
 		Schedule: schedule,
 		Job:      cmd,
 	}
@@ -139,6 +139,16 @@ func (c *Cron) Entry(id EntryID) Entry {
 		}
 	}
 	return Entry{}
+}
+
+// Exist return true if given entry exsit, othewise return false.
+func (c *Cron) Exist(id EntryID) bool {
+	for _, e := range c.entries {
+		if e.ID == id {
+			return true
+		}
+	}
+	return false
 }
 
 // Remove an entry from being run in the future.
